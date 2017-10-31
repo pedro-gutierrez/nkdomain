@@ -29,6 +29,7 @@
 -export([object_info/0, object_es_mapping/0, object_parse/2, object_api_syntax/2, object_api_cmd/2]).
 -export([object_admin_info/0]).
 -export([make_file_id/0, upload/4, download/3]).
+-export([get_file/1]).
 
 -include("nkdomain.hrl").
 -include("nkdomain_debug.hrl").
@@ -121,17 +122,21 @@ http_get(FileId, Req) ->
     end,
     case nkdomain_api_util:check_raw_token(Token) of
         {ok, _UserId, _UserDomainId, _LoginMeta, _SessId} ->
-            case nkdomain:get_obj(FileId) of
-                {ok, #{obj_id:=FileObjId, ?DOMAIN_FILE:=File}} ->
-                    CT = maps:get(content_type, File),
-                    case get_store(File) of
-                        {ok, _StoreObjId, Store} ->
-                            case nkfile:download(?NKROOT, Store, File#{name=>FileObjId}) of
-                                {ok, _, Body} ->
-                                    {ok, CT, Body};
-                                {error, Error} ->
-                                    {error, Error}
-                            end;
+            get_file(FileId);
+        {error, Error} ->
+            {error, Error}
+    end.
+
+
+get_file(FileId) ->
+    case nkdomain:get_obj(FileId) of
+        {ok, #{obj_id:=FileObjId, ?DOMAIN_FILE:=File}} ->
+            CT = maps:get(content_type, File),
+            case get_store(File) of
+                {ok, _StoreObjId, Store} ->
+                    case nkfile:download(?NKROOT, Store, File#{name=>FileObjId}) of
+                        {ok, _, Body} ->
+                            {ok, CT, Body};
                         {error, Error} ->
                             {error, Error}
                     end;
@@ -141,7 +146,6 @@ http_get(FileId, Req) ->
         {error, Error} ->
             {error, Error}
     end.
-
 
 
 %% @private
