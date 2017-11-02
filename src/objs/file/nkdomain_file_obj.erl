@@ -29,7 +29,7 @@
 -export([object_info/0, object_es_mapping/0, object_parse/2, object_api_syntax/2, object_api_cmd/2]).
 -export([object_admin_info/0]).
 -export([make_file_id/0, upload/4, download/3]).
--export([get_file/1]).
+-export([get_file/1, get_store/1]).
 
 -include("nkdomain.hrl").
 -include("nkdomain_debug.hrl").
